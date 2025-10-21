@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Explorer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="window">
+    <div class="toolbar">
+      <div class="toolbar-top">
+        <div class="nav-buttons">
+          <button id="back-btn" class="nav-btn" title="Back">
+            <svg width="16" height="16" viewBox="0 0 16 16">
+              <path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="forward-btn" class="nav-btn" title="Forward">
+            <svg width="16" height="16" viewBox="0 0 16 16">
+              <path d="M6 2l6 6-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="up-btn" class="nav-btn" title="Up">
+            <svg width="16" height="16" viewBox="0 0 16 16">
+              <path d="M2 10l6-6 6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="refresh-btn" class="nav-btn" title="Refresh">
+            <svg width="16" height="16" viewBox="0 0 16 16">
+              <path d="M13 3a7 7 0 1 0-1.5 4.5M13 3v3m0-3h-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="address-bar">
+          <div id="breadcrumb" class="breadcrumb"></div>
+          <input type="text" id="address-input" class="address-input" style="display: none;">
+        </div>
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 16 16" class="search-icon">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search">
+        </div>
+      </div>
+      <div class="toolbar-bottom">
+        <button id="new-folder-btn" class="toolbar-btn" title="New folder">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M2 3h5l1.5 2H14a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <path d="M8 7v4M6 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>New</span>
+        </button>
+        <div class="toolbar-divider"></div>
+        <button id="cut-btn" class="toolbar-btn" title="Cut">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M14 6L8 12 2 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="4" cy="4" r="1.5" stroke="currentColor" fill="none" stroke-width="1"/>
+            <circle cx="12" cy="4" r="1.5" stroke="currentColor" fill="none" stroke-width="1"/>
+            <path d="M4 4l4 4m4-4l-4 4" stroke="currentColor" stroke-width="1"/>
+          </svg>
+          <span>Cut</span>
+        </button>
+        <button id="copy-btn" class="toolbar-btn" title="Copy">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <rect x="5" y="5" width="9" height="9" rx="1" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <path d="M3 11V3a1 1 0 0 1 1-1h8" stroke="currentColor" fill="none" stroke-width="1.5"/>
+          </svg>
+          <span>Copy</span>
+        </button>
+        <button id="paste-btn" class="toolbar-btn" title="Paste">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <rect x="4" y="5" width="8" height="9" rx="1" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <path d="M6 5V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2" stroke="currentColor" fill="none" stroke-width="1.5"/>
+          </svg>
+          <span>Paste</span>
+        </button>
+        <button id="rename-btn" class="toolbar-btn" title="Rename">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M11 2l3 3-8 8H3v-3z" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+          <span>Rename</span>
+        </button>
+        <button id="delete-btn" class="toolbar-btn" title="Delete">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M3 5h10M5 5V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m1 0v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5h8z" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Delete</span>
+        </button>
+        <div class="toolbar-divider"></div>
+        <button id="share-btn" class="toolbar-btn" title="Share">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <circle cx="4" cy="8" r="2" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <circle cx="12" cy="4" r="2" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="2" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <path d="M6 7l4-2M6 9l4 2" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span>Share</span>
+        </button>
+        <div class="spacer"></div>
+        <button id="view-details-btn" class="toolbar-btn" title="Details view">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button id="view-list-btn" class="toolbar-btn" title="List view">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <rect x="2" y="2" width="5" height="5" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <rect x="9" y="2" width="5" height="5" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <rect x="2" y="9" width="5" height="5" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <rect x="9" y="9" width="5" height="5" stroke="currentColor" fill="none" stroke-width="1.5"/>
+          </svg>
+        </button>
+        <button id="view-icons-btn" class="toolbar-btn" title="Large icons view">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <rect x="1" y="1" width="6" height="6" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <rect x="9" y="1" width="6" height="6" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <rect x="1" y="9" width="6" height="6" stroke="currentColor" fill="none" stroke-width="1.5"/>
+            <rect x="9" y="9" width="6" height="6" stroke="currentColor" fill="none" stroke-width="1.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="main-container">
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-header">
+            <svg width="14" height="14" viewBox="0 0 16 16" class="sidebar-icon">
+              <path d="M2 3l6 2 6-2v8l-6 2-6-2z" stroke="currentColor" fill="none" stroke-width="1.5"/>
+              <path d="M8 5v8" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <span>Quick access</span>
+          </div>
+          <div id="quick-access-list" class="sidebar-items"></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-header">
+            <svg width="14" height="14" viewBox="0 0 16 16" class="sidebar-icon">
+              <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" fill="none" stroke-width="1.5"/>
+              <path d="M2 6h12" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <span>This PC</span>
+          </div>
+          <div id="thispc-list" class="sidebar-items"></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-header">
+            <svg width="14" height="14" viewBox="0 0 16 16" class="sidebar-icon">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" fill="none" stroke-width="1.5"/>
+              <circle cx="8" cy="8" r="2" fill="currentColor"/>
+            </svg>
+            <span>Drives</span>
+          </div>
+          <div id="drives-list" class="sidebar-items"></div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div id="file-list" class="file-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="context-menu" class="context-menu" style="display: none;">
+    <div class="context-menu-item" data-action="open">Open</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" data-action="cut">Cut</div>
+    <div class="context-menu-item" data-action="copy">Copy</div>
+    <div class="context-menu-item" data-action="paste">Paste</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" data-action="rename">Rename</div>
+    <div class="context-menu-item" data-action="delete">Delete</div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
