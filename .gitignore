@@ -6,3 +6,4 @@ build/
 npm-debug.log*
 .npm
 .electron-gyp
+package-lock.json
