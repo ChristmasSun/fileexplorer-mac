@@ -1,0 +1,153 @@
+#!/bin/bash
+# Path-agnostic launcher for the app bundle
+# Behavior:
+# - Determines the app's containing resources and switches to the project directory
+# - Locates a usable `node`/`npm` binary from environment, well-known locations, or nvm
+# - Allows overrides via APP_DIR and NODE_BIN environment variables
+# - Supports a --dry-run flag to print actions without executing
+
+set -euo pipefail
+
+# Support dry-run mode
+DRY_RUN=0
+if [[ "${1:-}" == "--dry-run" ]]; then
+	DRY_RUN=1
+	shift
+fi
+
+# If APP_DIR is provided, use it. Otherwise compute the project root relative to this launcher.
+if [[ -n "${APP_DIR:-}" ]]; then
+  PROJECT_DIR="$APP_DIR"
+else
+  # Resolve the location of this script even if invoked via symlink
+  SOURCE="${BASH_SOURCE[0]}"
+  while [ -h "$SOURCE" ]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  done
+  LAUNCHER_DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+  
+  # The bundle layout: .../File Explorer Launcher.app/Contents/MacOS/launcher
+  # Try multiple locations in order of preference:
+  PROJECT_DIR=""
+  
+  # 1. Check if project files are bundled in Resources/app (preferred for portable .app)
+  if [[ -f "$LAUNCHER_DIR/../Resources/app/package.json" ]]; then
+    PROJECT_DIR="$LAUNCHER_DIR/../Resources/app"
+  fi
+  
+  # 2. Check if project files are bundled in Resources (alternate location)
+  if [[ -z "$PROJECT_DIR" ]] && [[ -f "$LAUNCHER_DIR/../Resources/package.json" ]]; then
+    PROJECT_DIR="$LAUNCHER_DIR/../Resources"
+  fi
+  
+  # 3. Check two levels up (if .app is in the project root directory)
+  if [[ -z "$PROJECT_DIR" ]] && [[ -f "$LAUNCHER_DIR/../../package.json" ]]; then
+    PROJECT_DIR="$(cd "$LAUNCHER_DIR/../.." && pwd -P)"
+  fi
+  
+  # 4. As last resort, check parent of .app if it exists in /Applications or similar
+  if [[ -z "$PROJECT_DIR" ]]; then
+    APP_PARENT="$(dirname "$(dirname "$(dirname "$(dirname "$LAUNCHER_DIR")")")")"
+    if [[ -f "$APP_PARENT/package.json" ]]; then
+      PROJECT_DIR="$APP_PARENT"
+    fi
+  fi
+  
+  if [[ -z "$PROJECT_DIR" ]]; then
+    echo "Error: Could not find project directory with package.json."
+    echo "Please set APP_DIR to point to your project root and try again:"
+    echo "  export APP_DIR=/path/to/your/project"
+    echo "  $0"
+    exit 3
+  fi
+fi
+
+# Normalize PROJECT_DIR
+PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd -P)"
+
+echo "Using project directory: $PROJECT_DIR"
+
+# Helper to find node/npm
+find_node() {
+	# If NODE_BIN is provided, prefer it
+	if [[ -n "${NODE_BIN:-}" ]]; then
+		if [[ -x "$NODE_BIN" ]]; then
+			echo "$NODE_BIN"
+			return 0
+		fi
+	fi
+
+	# If npm is on PATH and is functional, use that
+	if command -v npm >/dev/null 2>&1; then
+		# Prefer the node executable that npm uses
+		NPM_PATH="$(command -v npm)"
+		# try to find node near npm
+		POSS_NODE="$(dirname "$NPM_PATH")/node"
+		if [[ -x "$POSS_NODE" ]]; then
+			echo "$POSS_NODE"
+			return 0
+		fi
+		# fallback to system node
+		if command -v node >/dev/null 2>&1; then
+			echo "$(command -v node)"
+			return 0
+		fi
+	fi
+
+	# Common Homebrew locations (Intel and Apple Silicon)
+	for p in /opt/homebrew/bin/node /usr/local/bin/node /usr/bin/node; do
+		if [[ -x "$p" ]]; then
+			echo "$p"
+			return 0
+		fi
+	done
+
+	# Try nvm default location under home directory (best-effort; nvm is a shell function normally)
+	if [[ -d "$HOME/.nvm/versions/node" ]]; then
+		# pick the highest version installed
+		NODE_CANDIDATE=$(ls -1 "$HOME/.nvm/versions/node" | sort -V | tail -n1 2>/dev/null || true)
+		if [[ -n "$NODE_CANDIDATE" ]]; then
+			CAND="$HOME/.nvm/versions/node/$NODE_CANDIDATE/bin/node"
+			if [[ -x "$CAND" ]]; then
+				echo "$CAND"
+				return 0
+			fi
+		fi
+	fi
+
+	return 1
+}
+
+NODE_BIN_FOUND=""
+if NODE_BIN_FOUND="$(find_node)"; then
+	echo "Found node at: $NODE_BIN_FOUND"
+else
+	echo "Error: couldn't find a usable node/npm installation."
+	echo "Please install Node.js or set NODE_BIN to the node binary and ensure npm is available."
+	exit 2
+fi
+
+# Export PATH so that npm picks up the corresponding node if necessary
+export PATH="$(dirname "$NODE_BIN_FOUND"):$PATH"
+
+# Switch to project dir
+cd "$PROJECT_DIR"
+
+# Install dependencies if node_modules is missing
+if [[ ! -d "node_modules" ]]; then
+  echo "Installing dependencies..."
+  npm ci
+fi
+
+# Final command
+CMD=(npm start)
+
+if [[ $DRY_RUN -eq 1 ]]; then
+	echo "Dry run: would run in $PROJECT_DIR: ${CMD[*]} (NODE_BIN=$NODE_BIN_FOUND)"
+	exit 0
+fi
+
+echo "Starting app..."
+exec "${CMD[@]}"

@@ -138,6 +138,15 @@
         <div class="sidebar-section">
           <div class="sidebar-header">
             <svg width="14" height="14" viewBox="0 0 16 16" class="sidebar-icon">
+              <path d="M8 2l1 3h3l-2.5 2 1 3L8 8.5 5.5 10l1-3L4 5h3z" fill="currentColor"/>
+            </svg>
+            <span>Recent</span>
+          </div>
+          <div id="recent-list" class="sidebar-items"></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-header">
+            <svg width="14" height="14" viewBox="0 0 16 16" class="sidebar-icon">
               <rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" fill="none" stroke-width="1.5"/>
               <path d="M2 6h12" stroke="currentColor" stroke-width="1.5"/>
             </svg>
@@ -172,6 +181,19 @@
     <div class="context-menu-divider"></div>
     <div class="context-menu-item" data-action="rename">Rename</div>
     <div class="context-menu-item" data-action="delete">Delete</div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" data-action="pin-quick-access">Pin to Quick access</div>
+    <div class="context-menu-item" data-action="unpin-quick-access">Unpin from Quick access</div>
+  </div>
+
+  <div id="global-search-modal" class="search-modal" style="display: none;">
+    <div class="search-modal-content">
+      <div class="search-modal-header">
+        <input type="text" id="global-search-input" placeholder="Search entire system..." autofocus>
+        <button id="close-search-modal" class="close-btn">&times;</button>
+      </div>
+      <div id="global-search-results" class="search-results"></div>
+    </div>
   </div>
 
   <script src="renderer.js"></script>

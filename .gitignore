@@ -7,3 +7,6 @@ npm-debug.log*
 .npm
 .electron-gyp
 package-lock.json
+quick-access.json
+undo-history.json
+.claude/
